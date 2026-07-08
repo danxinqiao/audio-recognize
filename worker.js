@@ -17,23 +17,21 @@ export default {
 
     try {
       const audioBuffer = await request.arrayBuffer();
+      
+      // 将 ArrayBuffer 转为 base64 字符串（官方推荐格式）
+      const base64 = arrayBufferToBase64(audioBuffer);
 
-      // 尝试用 -turbo 模型（如果 -large-v3 不可用就换这个）
-      const modelName = '@cf/openai/whisper-large-v3-turbo';
-      // 如果账号有 large-v3 权限，也可以替换为 '@cf/openai/whisper-large-v3'
-
-      const result = await env.AI.run(modelName, {
-        audio: [...new Uint8Array(audioBuffer)], // 二进制数组输入
-      });
+      const result = await env.AI.run(
+        '@cf/openai/whisper-large-v3-turbo',
+        { audio: base64 }       // ✅ 现在是一个字符串
+      );
 
       return Response.json(
         {
           text: result.text,
-          language: result.detected_language, // 模型返回的语言代码
+          language: result.detected_language,
         },
-        {
-          headers: { 'Access-Control-Allow-Origin': '*' },
-        }
+        { headers: { 'Access-Control-Allow-Origin': '*' } }
       );
     } catch (error) {
       return Response.json(
@@ -46,3 +44,13 @@ export default {
     }
   },
 };
+
+// 辅助函数：ArrayBuffer → base64（Cloudflare Workers 完全兼容）
+function arrayBufferToBase64(buffer) {
+  let binary = '';
+  const bytes = new Uint8Array(buffer);
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
+}
