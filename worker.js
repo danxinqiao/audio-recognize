@@ -23,7 +23,10 @@ export default {
 
       const result = await env.AI.run(
         '@cf/openai/whisper-large-v3-turbo',
-        { audio: base64 }       // ✅ 现在是一个字符串
+        {
+          audio: base64,
+          language: "yue"
+        }
       );
 
       return Response.json(
