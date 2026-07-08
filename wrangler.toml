@@ -1,0 +1,6 @@
+name = "speech-lang-demo"
+main = "worker.js"
+compatibility_date = "2025-07-08"
+
+[ai]
+binding = "AI"
